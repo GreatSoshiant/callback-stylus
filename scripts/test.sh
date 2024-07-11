@@ -56,4 +56,17 @@ echo "Interacting with Target contract"
 echo "-------------------------"
 
 # Call cast to execute the function
-cast send $contract_address "execute(address)" "$target_contract_address" --rpc-url $RPC_URL --private-key $PRIVATE_KEY 
+tx_hash=$(cast send $contract_address "execute(address)" "$target_contract_address" --rpc-url $RPC_URL --private-key $PRIVATE_KEY --json | jq -r '.transactionHash')
+
+# Get the full transaction receipt using curl
+receipt=$(curl -s -X POST --data '{"jsonrpc":"2.0","method":"eth_getTransactionReceipt","params":["'"$tx_hash"'"],"id":1}' -H "Content-Type: application/json" $RPC_URL)
+
+status=$(echo $receipt | jq -r '.result.status')
+
+if [ "$status" == "0x1" ]; then
+    echo "The test was successful"
+    echo "Transaction hash: $tx_hash"
+else
+    echo "The test failed"
+    exit 1
+fi
