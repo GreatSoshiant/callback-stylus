@@ -1,3 +1,5 @@
 /target
 .deployment_key
 target-contract/activation_tx_data
+target/.rustc_info.json
+/target
